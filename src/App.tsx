@@ -3,6 +3,7 @@ import './App.css'
 import CategoryTabs, { type CategoryName } from './components/CategoryTabs'
 import Panier from './components/Panier'
 import Compte from './components/Compte'
+import ProductCard from './components/ProductCard'
 
 type Product = {
   id: number
@@ -215,15 +216,7 @@ function App() {
       <section className="bestSellerSection">
         <div className="productGrid">
           {filteredProducts.map((product) => (
-            <article className="productCard" key={product.id}>
-              <div className="productEmoji">{product.emoji}</div>
-              <div>
-                <h3>{product.name}</h3>
-                <p className="productCategory">{product.category}</p>
-                <p>{product.description}</p>
-              </div>
-              <strong>{product.price}</strong>
-            </article>
+            <ProductCard product={product} key={product.id} />
           ))}
         </div>
       </section>
