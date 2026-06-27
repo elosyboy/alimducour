@@ -13,10 +13,11 @@
 .visionCard {
   position: relative;
   width: min(920px, 100%);
-  max-height: min(720px, calc(100vh - 48px));
+  max-height: min(88vh, 760px);
   display: grid;
   grid-template-columns: 1fr 1fr;
   overflow: hidden;
+  overscroll-behavior: contain;
   border-radius: 38px;
   background: #ffffff;
   border: 1px solid rgba(255, 255, 255, 0.78);
@@ -99,6 +100,8 @@
   justify-content: center;
   gap: 18px;
   padding: 58px 52px 46px;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .visionTopLine {
@@ -226,28 +229,48 @@
 
 @media (max-width: 760px) {
   .visionOverlay {
-    align-items: end;
-    padding: 14px;
+    align-items: center;
+    padding: 12px;
   }
 
   .visionCard {
-    width: 100%;
-    max-height: calc(100vh - 28px);
-    grid-template-columns: 1fr;
-    border-radius: 30px;
+    width: min(100%, 430px);
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    grid-template-columns: none;
+    border-radius: 28px;
+  }
+
+  .visionCloseButton {
+    top: 10px;
+    right: 10px;
+    z-index: 6;
+    width: 38px;
+    height: 38px;
+    font-size: 27px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
   }
 
   .visionImageBox {
-    min-height: 260px;
+    width: 100%;
+    min-height: 0;
+    height: 32vh;
+    max-height: 230px;
+    flex: 0 0 auto;
   }
 
   .visionImage {
-    min-height: 260px;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: cover;
   }
 
   .visionImagePlaceholder {
     width: calc(100% - 28px);
-    min-height: 210px;
+    min-height: 150px;
+    height: calc(100% - 28px);
     margin: 14px;
     border-radius: 22px;
   }
@@ -258,40 +281,74 @@
   }
 
   .visionContent {
-    gap: 13px;
-    padding: 24px 22px 22px;
+    flex: 1;
+    min-height: 0;
+    gap: 12px;
+    padding: 18px 18px 0;
+    overflow-y: auto;
+  }
+
+  .visionTopLine span,
+  .visionTopLine strong {
+    padding: 7px 10px;
+    font-size: 11px;
   }
 
   .visionContent h2 {
-    font-size: 34px;
+    font-size: clamp(25px, 8vw, 34px);
+    line-height: 0.96;
   }
 
   .visionContent p {
+    max-width: none;
     font-size: 14px;
     line-height: 1.42;
   }
 
   .visionFooter {
+    position: sticky;
+    bottom: 0;
     align-items: stretch;
     flex-direction: column;
-    gap: 13px;
-    margin-top: 8px;
+    gap: 12px;
+    margin: 12px -18px 0;
+    padding: 13px 18px 18px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
   }
 
   .visionFooter > strong {
-    font-size: 30px;
+    font-size: 28px;
   }
 
   .visionAddButton {
     width: 100%;
     min-height: 48px;
   }
+}
 
-  .visionCloseButton {
-    top: 14px;
-    right: 14px;
-    width: 38px;
-    height: 38px;
-    font-size: 27px;
+@media (max-width: 390px) {
+  .visionOverlay {
+    padding: 9px;
+  }
+
+  .visionCard {
+    max-height: 90vh;
+    border-radius: 24px;
+  }
+
+  .visionImageBox {
+    height: 28vh;
+    max-height: 190px;
+  }
+
+  .visionContent {
+    padding: 15px 16px 0;
+  }
+
+  .visionFooter {
+    margin: 10px -16px 0;
+    padding: 12px 16px 15px;
   }
 }
