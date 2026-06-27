@@ -3,7 +3,6 @@ import { collection, onSnapshot } from 'firebase/firestore'
 import './App.css'
 import CategoryTabs, { type CategoryName } from './components/CategoryTabs'
 import Panier from './components/Panier'
-import Compte from './components/Compte'
 import ProductCard from './components/ProductCard'
 import VisionCard from './components/VisionCard'
 import { db } from './firebase'
@@ -62,7 +61,7 @@ const categories: CategoryName[] = [
 
 function App() {
   const [activeCategory, setActiveCategory] = useState<CategoryName>('Best seller')
-  const [currentPage, setCurrentPage] = useState<'home' | 'cart' | 'account'>('home')
+  const [currentPage, setCurrentPage] = useState<'home' | 'cart'>('home')
   const [products, setProducts] = useState<Product[]>([])
   const [isProductsLoading, setIsProductsLoading] = useState(true)
   const [productsError, setProductsError] = useState('')
@@ -184,9 +183,6 @@ function App() {
     return <Panier cartItems={cartItems} setCartItems={setCartItems} onBack={() => setCurrentPage('home')} />
   }
 
-  if (currentPage === 'account') {
-    return <Compte onBack={() => setCurrentPage('home')} />
-  }
 
   return (
     <main className="app">
@@ -194,13 +190,6 @@ function App() {
         <img className="logoImage" src="/logo.png" alt="Logo Alim du Cours" />
 
         <div className="headerActions">
-          <button
-            className="headerButton"
-            type="button"
-            onClick={() => setCurrentPage('account')}
-          >
-            Compte
-          </button>
 
           <button
             className="cartIconButton"
