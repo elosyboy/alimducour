@@ -191,7 +191,7 @@ function App() {
   return (
     <main className="app">
       <header className="header">
-        <img className="logoImage" src="/logo.png" alt="Logo Alimducour" />
+        <img className="logoImage" src="/logo.png" alt="Logo Alim du Cours" />
 
         <div className="headerActions">
           <button
@@ -289,7 +289,7 @@ function App() {
 
         <div className="detailsCard">
           <p className="eyebrow">Adresse & contact</p>
-          <h2>Alimducour</h2>
+          <h2>Alim du Cours</h2>
           <p>6 rue de la Mule Noire, 13100 Aix-en-Provence</p>
           <p className="accessText">À deux pas du Cours Mirabeau, facile d’accès depuis le centre-ville.</p>
           <p className="accessText">Accès pratique aussi par la route d’Italie.</p>
