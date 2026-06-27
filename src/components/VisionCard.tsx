@@ -1,14 +1,15 @@
-
-
+import { useState } from 'react'
 import './VisionCard.css'
 
 type VisionProduct = {
-  id: number
+  id: string
   name: string
   category: string
   description: string
   price: string
   emoji: string
+  imageUrl?: string
+  cloudinaryPublicId?: string
   isBestSeller?: boolean
 }
 
@@ -19,6 +20,18 @@ type VisionCardProps = {
 }
 
 function VisionCard({ product, onClose, onAddToCart }: VisionCardProps) {
+  const [isAdded, setIsAdded] = useState(false)
+
+  const handleAddToCart = () => {
+    navigator.vibrate?.(35)
+    onAddToCart()
+    setIsAdded(true)
+
+    window.setTimeout(() => {
+      setIsAdded(false)
+    }, 420)
+  }
+
   return (
     <div className="visionOverlay" role="presentation" onClick={onClose}>
       <article className="visionCard" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
@@ -26,8 +39,14 @@ function VisionCard({ product, onClose, onAddToCart }: VisionCardProps) {
           ×
         </button>
 
-        <div className="visionImageBox" aria-hidden="true">
-          <span className="visionEmoji">{product.emoji}</span>
+        <div className="visionImageBox">
+          {product.imageUrl ? (
+            <img className="visionImage" src={product.imageUrl} alt={product.name} />
+          ) : (
+            <div className="visionImagePlaceholder">
+              <span>Photo bientôt disponible</span>
+            </div>
+          )}
         </div>
 
         <div className="visionContent">
@@ -41,8 +60,12 @@ function VisionCard({ product, onClose, onAddToCart }: VisionCardProps) {
 
           <div className="visionFooter">
             <strong>{product.price}</strong>
-            <button className="visionAddButton" type="button" onClick={onAddToCart}>
-              Ajouter au panier
+            <button
+              className={`visionAddButton ${isAdded ? 'addedToCart' : ''}`}
+              type="button"
+              onClick={handleAddToCart}
+            >
+              {isAdded ? 'Ajouté au panier' : 'Ajouter au panier'}
             </button>
           </div>
         </div>

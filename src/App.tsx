@@ -1,20 +1,25 @@
 import { useEffect, useState } from 'react'
+import { collection, onSnapshot } from 'firebase/firestore'
 import './App.css'
 import CategoryTabs, { type CategoryName } from './components/CategoryTabs'
 import Panier from './components/Panier'
 import Compte from './components/Compte'
 import ProductCard from './components/ProductCard'
 import VisionCard from './components/VisionCard'
+import { db } from './firebase'
 
 type Product = {
-  id: number
+  id: string
   name: string
   category: string
   subCategory: string
   description: string
   price: string
   emoji: string
+  imageUrl?: string
+  cloudinaryPublicId?: string
   isBestSeller: boolean
+  isVisible?: boolean
 }
 
 type CartItem = Product & {
@@ -55,144 +60,61 @@ const categories: CategoryName[] = [
   'Divers',
 ]
 
-const bestSellers: Product[] = [
-  {
-    id: 1,
-    name: 'Pack Apéro Nuit',
-    category: 'Salé',
-    subCategory: 'Apéro',
-    description: 'Boisson, snack salé et gourmandise sucrée.',
-    price: '12,90 €',
-    emoji: '🛒',
-    isBestSeller: true,
-  },
-  {
-    id: 2,
-    name: 'Coca-Cola 1,5L',
-    category: 'Soft',
-    subCategory: 'Bouteilles',
-    description: 'Boisson fraîche classique pour accompagner ton repas.',
-    price: '2,90 €',
-    emoji: '🥤',
-    isBestSeller: true,
-  },
-  {
-    id: 3,
-    name: 'Ice Tea Pêche',
-    category: 'Soft',
-    subCategory: 'Canettes',
-    description: 'Boisson fraîche et sucrée au goût pêche.',
-    price: '2,50 €',
-    emoji: '🧊',
-    isBestSeller: false,
-  },
-  {
-    id: 4,
-    name: 'Pack Bière',
-    category: 'Alcool',
-    subCategory: 'Bières',
-    description: 'Sélection de bières fraîches disponibles en boutique.',
-    price: '8,90 €',
-    emoji: '🍺',
-    isBestSeller: false,
-  },
-  {
-    id: 5,
-    name: 'Bouteille Apéritif',
-    category: 'Alcool',
-    subCategory: 'Bouteilles',
-    description: 'Produit alcoolisé pour apéritif, selon disponibilité.',
-    price: '14,90 €',
-    emoji: '🍾',
-    isBestSeller: false,
-  },
-  {
-    id: 6,
-    name: 'Kinder Bueno',
-    category: 'Sucré',
-    subCategory: 'Chocolats',
-    description: 'Snack chocolaté gourmand pour une petite faim.',
-    price: '1,80 €',
-    emoji: '🍫',
-    isBestSeller: true,
-  },
-  {
-    id: 7,
-    name: 'Bonbons Mix',
-    category: 'Sucré',
-    subCategory: 'Bonbons',
-    description: 'Sachet de bonbons pour une envie sucrée.',
-    price: '2,50 €',
-    emoji: '🍬',
-    isBestSeller: false,
-  },
-  {
-    id: 8,
-    name: 'Chips Lay’s',
-    category: 'Salé',
-    subCategory: 'Chips',
-    description: 'Chips croustillantes pour apéritif ou snack rapide.',
-    price: '2,70 €',
-    emoji: '🥔',
-    isBestSeller: false,
-  },
-  {
-    id: 9,
-    name: 'Cacahuètes Salées',
-    category: 'Salé',
-    subCategory: 'Apéro',
-    description: 'Snack salé pratique pour accompagner une boisson.',
-    price: '2,20 €',
-    emoji: '🥜',
-    isBestSeller: false,
-  },
-  {
-    id: 10,
-    name: 'Lessive Dépannage',
-    category: 'Entretien',
-    subCategory: 'Maison',
-    description: 'Produit utile du quotidien pour dépannage rapide.',
-    price: '5,90 €',
-    emoji: '🧴',
-    isBestSeller: false,
-  },
-  {
-    id: 11,
-    name: 'Essuie-tout',
-    category: 'Entretien',
-    subCategory: 'Maison',
-    description: 'Indispensable maison, disponible en boutique.',
-    price: '3,50 €',
-    emoji: '🧻',
-    isBestSeller: false,
-  },
-  {
-    id: 12,
-    name: 'Briquet',
-    category: 'Divers',
-    subCategory: 'Accessoires',
-    description: 'Petit essentiel de dépannage.',
-    price: '1,50 €',
-    emoji: '🔥',
-    isBestSeller: false,
-  },
-  {
-    id: 13,
-    name: 'Chargeur Téléphone',
-    category: 'Divers',
-    subCategory: 'Accessoires',
-    description: 'Accessoire pratique selon disponibilité.',
-    price: '9,90 €',
-    emoji: '🔌',
-    isBestSeller: false,
-  },
-]
-
 function App() {
   const [activeCategory, setActiveCategory] = useState<CategoryName>('Best seller')
   const [currentPage, setCurrentPage] = useState<'home' | 'cart' | 'account'>('home')
+  const [products, setProducts] = useState<Product[]>([])
+  const [isProductsLoading, setIsProductsLoading] = useState(true)
+  const [productsError, setProductsError] = useState('')
   const [cartItems, setCartItems] = useState<CartItem[]>(getSavedCartItems)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, 'products'),
+      (snapshot) => {
+        const firestoreProducts = snapshot.docs
+          .map((doc) => {
+            const data = doc.data()
+
+            const product: Product = {
+              id: doc.id,
+              name: String(data.name ?? ''),
+              category: String(data.category ?? 'Divers'),
+              subCategory: String(data.subCategory ?? 'Autres'),
+              description: String(data.description ?? ''),
+              price: String(data.price ?? '0 €'),
+              emoji: String(data.emoji ?? '🛒'),
+              isBestSeller: Boolean(data.isBestSeller),
+              isVisible: data.isVisible !== false,
+            }
+
+            if (typeof data.imageUrl === 'string' && data.imageUrl.trim()) {
+              product.imageUrl = data.imageUrl
+            }
+
+            if (typeof data.cloudinaryPublicId === 'string' && data.cloudinaryPublicId.trim()) {
+              product.cloudinaryPublicId = data.cloudinaryPublicId
+            }
+
+            return product
+          })
+          .filter((product) => product.name && product.isVisible)
+
+        setProducts(firestoreProducts)
+        setProductsError('')
+        setIsProductsLoading(false)
+      },
+      (error) => {
+        console.error(error)
+        setProducts([])
+        setProductsError('Impossible de charger les produits pour le moment.')
+        setIsProductsLoading(false)
+      },
+    )
+
+    return () => unsubscribe()
+  }, [])
 
   useEffect(() => {
     const animatedElements = document.querySelectorAll('.mapCard, .detailsCard, .lockerSection')
@@ -236,10 +158,10 @@ function App() {
 
   const filteredProducts =
     activeCategory === 'Best seller'
-      ? bestSellers.filter((product) => product.isBestSeller)
+      ? products.filter((product) => product.isBestSeller)
       : activeCategory === 'All'
-        ? bestSellers
-        : bestSellers.filter((product) => product.category === activeCategory)
+        ? products
+        : products.filter((product) => product.category === activeCategory)
 
   const productSections =
     activeCategory === 'Best seller'
@@ -314,26 +236,43 @@ function App() {
       />
 
       <section className="bestSellerSection">
-        {productSections.map(([sectionTitle, products]) => (
-          <div className="productCategoryGroup" key={sectionTitle || 'best-seller'}>
-            {sectionTitle ? (
-              <div className="productCategoryHeader">
-                <h2>{sectionTitle}</h2>
-              </div>
-            ) : null}
-
-            <div className="productGrid">
-              {products.map((product) => (
-                <ProductCard
-                  product={product}
-                  key={product.id}
-                  onAddToCart={() => addProductToCart(product)}
-                  onOpenProduct={() => setSelectedProduct(product)}
-                />
-              ))}
-            </div>
+        {isProductsLoading ? (
+          <div className="productsStateCard">
+            <h2>Chargement des produits...</h2>
+            <p>Les produits de la boutique arrivent depuis Firebase.</p>
           </div>
-        ))}
+        ) : productsError ? (
+          <div className="productsStateCard">
+            <h2>Produits indisponibles</h2>
+            <p>{productsError}</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="productsStateCard">
+            <h2>Aucun produit disponible</h2>
+            <p>Ajoutez des produits dans Firebase pour les afficher sur le site.</p>
+          </div>
+        ) : (
+          productSections.map(([sectionTitle, products]) => (
+            <div className="productCategoryGroup" key={sectionTitle || 'best-seller'}>
+              {sectionTitle ? (
+                <div className="productCategoryHeader">
+                  <h2>{sectionTitle}</h2>
+                </div>
+              ) : null}
+
+              <div className="productGrid">
+                {products.map((product) => (
+                  <ProductCard
+                    product={product}
+                    key={product.id}
+                    onAddToCart={() => addProductToCart(product)}
+                    onOpenProduct={() => setSelectedProduct(product)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
+        )}
       </section>
 
       <section className="infoSection">

@@ -1,8 +1,10 @@
 import { type Dispatch, type SetStateAction, useState } from 'react'
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { auth, db } from '../firebase'
 import './Panier.css'
 
 type CartItem = {
-  id: number
+  id: string
   name: string
   category: string
   subCategory: string
@@ -10,7 +12,10 @@ type CartItem = {
   price: string
   quantity: number
   emoji: string
+  imageUrl?: string
+  cloudinaryPublicId?: string
   isBestSeller: boolean
+  isVisible?: boolean
 }
 
 type PanierProps = {
@@ -36,6 +41,14 @@ function parseProductPrice(price: string) {
 function Panier({ cartItems, setCartItems, onBack }: PanierProps) {
   const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'pickup'>('delivery')
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
+  const [customerName, setCustomerName] = useState('')
+  const [customerPhone, setCustomerPhone] = useState('')
+  const [customerAddress, setCustomerAddress] = useState('')
+  const [customerPostalCode, setCustomerPostalCode] = useState('13100')
+  const [wantedTime, setWantedTime] = useState('')
+  const [orderNote, setOrderNote] = useState('')
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false)
+  const [checkoutMessage, setCheckoutMessage] = useState('')
 
   const subtotal = cartItems.reduce(
     (total, item) => total + parseProductPrice(item.price) * item.quantity,
@@ -46,7 +59,7 @@ function Panier({ cartItems, setCartItems, onBack }: PanierProps) {
   const serviceFee = cartItems.length > 0 ? 0.5 : 0
   const total = subtotal + deliveryPrice + serviceFee
 
-  const increaseQuantity = (itemId: number) => {
+  const increaseQuantity = (itemId: string) => {
     setCartItems((items) =>
       items.map((item) =>
         item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item,
@@ -54,7 +67,7 @@ function Panier({ cartItems, setCartItems, onBack }: PanierProps) {
     )
   }
 
-  const decreaseQuantity = (itemId: number) => {
+  const decreaseQuantity = (itemId: string) => {
     setCartItems((items) =>
       items
         .map((item) =>
@@ -64,8 +77,79 @@ function Panier({ cartItems, setCartItems, onBack }: PanierProps) {
     )
   }
 
-  const removeItem = (itemId: number) => {
+  const removeItem = (itemId: string) => {
     setCartItems((items) => items.filter((item) => item.id !== itemId))
+  }
+
+  const submitOrder = async () => {
+    setCheckoutMessage('')
+
+    if (cartItems.length === 0) {
+      setCheckoutMessage('Votre panier est vide.')
+      return
+    }
+
+    if (!customerName.trim() || !customerPhone.trim()) {
+      setCheckoutMessage('Ajoutez votre prénom et votre numéro de téléphone.')
+      return
+    }
+
+    if (deliveryMode === 'delivery' && !customerAddress.trim()) {
+      setCheckoutMessage('Ajoutez une adresse de livraison complète.')
+      return
+    }
+
+    setIsSubmittingOrder(true)
+
+    try {
+      const currentUser = auth.currentUser
+
+      await addDoc(collection(db, 'orders'), {
+        userId: currentUser?.uid ?? null,
+        customerEmail: currentUser?.email ?? null,
+        customerName: customerName.trim(),
+        customerPhone: customerPhone.trim(),
+        customerAddress: customerAddress.trim(),
+        customerPostalCode: customerPostalCode.trim(),
+        wantedTime: wantedTime || null,
+        orderNote: orderNote.trim(),
+        deliveryMode,
+        items: cartItems.map((item) => ({
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          subCategory: item.subCategory,
+          description: item.description,
+          price: item.price,
+          quantity: item.quantity,
+          imageUrl: item.imageUrl ?? null,
+          cloudinaryPublicId: item.cloudinaryPublicId ?? null,
+        })),
+        subtotal,
+        deliveryPrice,
+        serviceFee,
+        total,
+        totalQuantity,
+        status: 'pending',
+        source: 'site',
+        createdAt: serverTimestamp(),
+      })
+
+      setCartItems([])
+      setCustomerName('')
+      setCustomerPhone('')
+      setCustomerAddress('')
+      setCustomerPostalCode('13100')
+      setWantedTime('')
+      setOrderNote('')
+      setCheckoutMessage('Commande envoyée. La boutique va la préparer.')
+      setIsCheckoutOpen(false)
+    } catch (error) {
+      console.error(error)
+      setCheckoutMessage('Impossible d’envoyer la commande pour le moment.')
+    } finally {
+      setIsSubmittingOrder(false)
+    }
   }
 
   if (isCheckoutOpen) {
@@ -96,12 +180,22 @@ function Panier({ cartItems, setCartItems, onBack }: PanierProps) {
             <div className="formGrid">
               <label>
                 Prénom
-                <input type="text" placeholder="Votre prénom" />
+                <input
+                  type="text"
+                  placeholder="Votre prénom"
+                  value={customerName}
+                  onChange={(event) => setCustomerName(event.target.value)}
+                />
               </label>
 
               <label>
                 Numéro de téléphone
-                <input type="tel" placeholder="07 00 00 00 00" />
+                <input
+                  type="tel"
+                  placeholder="07 00 00 00 00"
+                  value={customerPhone}
+                  onChange={(event) => setCustomerPhone(event.target.value)}
+                />
               </label>
 
               <label className="fullField">
@@ -113,27 +207,49 @@ function Panier({ cartItems, setCartItems, onBack }: PanierProps) {
                       ? 'Adresse complète de livraison'
                       : 'Adresse facultative pour le retrait'
                   }
+                  value={customerAddress}
+                  onChange={(event) => setCustomerAddress(event.target.value)}
                 />
               </label>
 
               <label>
                 Code postal
-                <input type="text" placeholder="13100" />
+                <input
+                  type="text"
+                  placeholder="13100"
+                  value={customerPostalCode}
+                  onChange={(event) => setCustomerPostalCode(event.target.value)}
+                />
               </label>
 
               <label>
                 Heure souhaitée
-                <input type="time" />
+                <input
+                  type="time"
+                  value={wantedTime}
+                  onChange={(event) => setWantedTime(event.target.value)}
+                />
               </label>
 
               <label className="fullField">
                 Note pour la commande
-                <textarea placeholder="Étage, interphone, précision, remplacement si produit absent..." />
+                <textarea
+                  placeholder="Étage, interphone, précision, remplacement si produit absent..."
+                  value={orderNote}
+                  onChange={(event) => setOrderNote(event.target.value)}
+                />
               </label>
             </div>
 
-            <button className="checkoutButton" type="button">
-              Valider la commande
+            {checkoutMessage ? <p className="checkoutMessage">{checkoutMessage}</p> : null}
+
+            <button
+              className="checkoutButton"
+              type="button"
+              onClick={submitOrder}
+              disabled={isSubmittingOrder || cartItems.length === 0}
+            >
+              {isSubmittingOrder ? 'Envoi de la commande...' : 'Valider la commande'}
             </button>
           </form>
 
@@ -162,7 +278,7 @@ function Panier({ cartItems, setCartItems, onBack }: PanierProps) {
             </div>
 
             <p className="cartNote">
-              Ensuite, cette page pourra envoyer automatiquement la commande au bot Telegram.
+              La boutique recevra votre commande et vous contactera si besoin.
             </p>
           </aside>
         </section>
@@ -200,7 +316,15 @@ function Panier({ cartItems, setCartItems, onBack }: PanierProps) {
 
             {cartItems.map((item) => (
               <article className="cartItem" key={item.id}>
-                <div className="cartItemEmoji">{item.emoji}</div>
+                <div className="cartItemEmoji">
+                  {item.imageUrl ? (
+                    <img className="cartItemImage" src={item.imageUrl} alt={item.name} />
+                  ) : (
+                    <div className="cartItemImagePlaceholder">
+                      <span>Photo bientôt disponible</span>
+                    </div>
+                  )}
+                </div>
 
                 <div className="cartItemInfo">
                   <h3>{item.name}</h3>
@@ -287,8 +411,10 @@ function Panier({ cartItems, setCartItems, onBack }: PanierProps) {
             Commander maintenant
           </button>
 
+          {checkoutMessage ? <p className="checkoutMessage">{checkoutMessage}</p> : null}
+
           <p className="cartNote">
-            Votre panier est maintenant connecté aux produits ajoutés depuis la boutique.
+            Votre commande sera transmise à la boutique après validation.
           </p>
         </aside>
       </section>

@@ -2,12 +2,14 @@ import { useState } from 'react'
 import './ProductCard.css'
 
 export type ProductCardData = {
-  id: number
+  id: string
   name: string
   category: string
   description: string
   price: string
   emoji: string
+  imageUrl?: string
+  cloudinaryPublicId?: string
   isBestSeller?: boolean
 }
 
@@ -31,8 +33,14 @@ function ProductCard({ product, onAddToCart, onOpenProduct }: ProductCardProps) 
   }
   return (
     <article className={`productCard ${isAdded ? 'addedToCart' : ''}`} onClick={onOpenProduct} role="button" tabIndex={0}>
-      <div className="productImageBox" aria-hidden="true">
-        <span className="productEmoji">{product.emoji}</span>
+      <div className="productImageBox">
+        {product.imageUrl ? (
+          <img className="productImage" src={product.imageUrl} alt={product.name} />
+        ) : (
+          <div className="productImagePlaceholder">
+            <span>Photo bientôt disponible</span>
+          </div>
+        )}
       </div>
 
       <div className="productInfo">
