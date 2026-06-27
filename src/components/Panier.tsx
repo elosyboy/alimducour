@@ -1,37 +1,23 @@
-import { useState } from 'react'
+import { type Dispatch, type SetStateAction, useState } from 'react'
 import './Panier.css'
 
 type CartItem = {
   id: number
   name: string
   category: string
-  price: number
+  subCategory: string
+  description: string
+  price: string
   quantity: number
   emoji: string
+  isBestSeller: boolean
 }
 
 type PanierProps = {
+  cartItems: CartItem[]
+  setCartItems: Dispatch<SetStateAction<CartItem[]>>
   onBack: () => void
 }
-
-const initialCartItems: CartItem[] = [
-  {
-    id: 1,
-    name: 'Pack Apéro Nuit',
-    category: 'Salé',
-    price: 12.9,
-    quantity: 1,
-    emoji: '🛒',
-  },
-  {
-    id: 2,
-    name: 'Coca-Cola 1,5L',
-    category: 'Soft',
-    price: 2.9,
-    quantity: 2,
-    emoji: '🥤',
-  },
-]
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat('fr-FR', {
@@ -40,12 +26,21 @@ function formatPrice(price: number) {
   }).format(price)
 }
 
-function Panier({ onBack }: PanierProps) {
+function parseProductPrice(price: string) {
+  const normalizedPrice = price.replace('€', '').replace(',', '.').trim()
+  const parsedPrice = Number.parseFloat(normalizedPrice)
+
+  return Number.isNaN(parsedPrice) ? 0 : parsedPrice
+}
+
+function Panier({ cartItems, setCartItems, onBack }: PanierProps) {
   const [deliveryMode, setDeliveryMode] = useState<'delivery' | 'pickup'>('delivery')
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems)
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
 
-  const subtotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0)
+  const subtotal = cartItems.reduce(
+    (total, item) => total + parseProductPrice(item.price) * item.quantity,
+    0,
+  )
   const totalQuantity = cartItems.reduce((total, item) => total + item.quantity, 0)
   const deliveryPrice = deliveryMode === 'delivery' ? 3.5 : 0
   const serviceFee = cartItems.length > 0 ? 0.5 : 0
@@ -196,13 +191,20 @@ function Panier({ onBack }: PanierProps) {
           </div>
 
           <div className="cartItemsList">
+            {cartItems.length === 0 ? (
+              <div className="emptyCartMessage">
+                <h3>Votre panier est vide</h3>
+                <p>Ajoutez des produits depuis la boutique pour commencer une commande.</p>
+              </div>
+            ) : null}
+
             {cartItems.map((item) => (
               <article className="cartItem" key={item.id}>
                 <div className="cartItemEmoji">{item.emoji}</div>
 
                 <div className="cartItemInfo">
                   <h3>{item.name}</h3>
-                  <p>{item.category}</p>
+                  <p>{item.subCategory}</p>
                 </div>
 
                 <div className="cartItemActions">
@@ -225,7 +227,7 @@ function Panier({ onBack }: PanierProps) {
                   </button>
                 </div>
 
-                <strong>{formatPrice(item.price * item.quantity)}</strong>
+                <strong>{formatPrice(parseProductPrice(item.price) * item.quantity)}</strong>
               </article>
             ))}
           </div>
@@ -286,7 +288,7 @@ function Panier({ onBack }: PanierProps) {
           </button>
 
           <p className="cartNote">
-            Les produits et la livraison seront ensuite connectés au bot Telegram et à la base de données.
+            Votre panier est maintenant connecté aux produits ajoutés depuis la boutique.
           </p>
         </aside>
       </section>

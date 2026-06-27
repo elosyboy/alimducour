@@ -1,18 +1,46 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import CategoryTabs, { type CategoryName } from './components/CategoryTabs'
 import Panier from './components/Panier'
 import Compte from './components/Compte'
 import ProductCard from './components/ProductCard'
+import VisionCard from './components/VisionCard'
 
 type Product = {
   id: number
   name: string
-  category: Exclude<CategoryName, 'Best seller' | 'All'>
+  category: string
+  subCategory: string
   description: string
   price: string
   emoji: string
   isBestSeller: boolean
+}
+
+type CartItem = Product & {
+  quantity: number
+}
+
+const CART_STORAGE_KEY = 'alimducour-cart'
+
+function getSavedCartItems() {
+  try {
+    const savedCart = window.localStorage.getItem(CART_STORAGE_KEY)
+
+    if (!savedCart) {
+      return []
+    }
+
+    const parsedCart = JSON.parse(savedCart) as CartItem[]
+
+    if (!Array.isArray(parsedCart)) {
+      return []
+    }
+
+    return parsedCart
+  } catch {
+    return []
+  }
 }
 
 const categories: CategoryName[] = [
@@ -20,6 +48,7 @@ const categories: CategoryName[] = [
   'All',
   'Soft',
   'Alcool',
+  'Puff',
   'Sucré',
   'Salé',
   'Entretien',
@@ -31,6 +60,7 @@ const bestSellers: Product[] = [
     id: 1,
     name: 'Pack Apéro Nuit',
     category: 'Salé',
+    subCategory: 'Apéro',
     description: 'Boisson, snack salé et gourmandise sucrée.',
     price: '12,90 €',
     emoji: '🛒',
@@ -40,6 +70,7 @@ const bestSellers: Product[] = [
     id: 2,
     name: 'Coca-Cola 1,5L',
     category: 'Soft',
+    subCategory: 'Bouteilles',
     description: 'Boisson fraîche classique pour accompagner ton repas.',
     price: '2,90 €',
     emoji: '🥤',
@@ -49,6 +80,7 @@ const bestSellers: Product[] = [
     id: 3,
     name: 'Ice Tea Pêche',
     category: 'Soft',
+    subCategory: 'Canettes',
     description: 'Boisson fraîche et sucrée au goût pêche.',
     price: '2,50 €',
     emoji: '🧊',
@@ -58,6 +90,7 @@ const bestSellers: Product[] = [
     id: 4,
     name: 'Pack Bière',
     category: 'Alcool',
+    subCategory: 'Bières',
     description: 'Sélection de bières fraîches disponibles en boutique.',
     price: '8,90 €',
     emoji: '🍺',
@@ -67,6 +100,7 @@ const bestSellers: Product[] = [
     id: 5,
     name: 'Bouteille Apéritif',
     category: 'Alcool',
+    subCategory: 'Bouteilles',
     description: 'Produit alcoolisé pour apéritif, selon disponibilité.',
     price: '14,90 €',
     emoji: '🍾',
@@ -76,6 +110,7 @@ const bestSellers: Product[] = [
     id: 6,
     name: 'Kinder Bueno',
     category: 'Sucré',
+    subCategory: 'Chocolats',
     description: 'Snack chocolaté gourmand pour une petite faim.',
     price: '1,80 €',
     emoji: '🍫',
@@ -85,6 +120,7 @@ const bestSellers: Product[] = [
     id: 7,
     name: 'Bonbons Mix',
     category: 'Sucré',
+    subCategory: 'Bonbons',
     description: 'Sachet de bonbons pour une envie sucrée.',
     price: '2,50 €',
     emoji: '🍬',
@@ -94,6 +130,7 @@ const bestSellers: Product[] = [
     id: 8,
     name: 'Chips Lay’s',
     category: 'Salé',
+    subCategory: 'Chips',
     description: 'Chips croustillantes pour apéritif ou snack rapide.',
     price: '2,70 €',
     emoji: '🥔',
@@ -103,6 +140,7 @@ const bestSellers: Product[] = [
     id: 9,
     name: 'Cacahuètes Salées',
     category: 'Salé',
+    subCategory: 'Apéro',
     description: 'Snack salé pratique pour accompagner une boisson.',
     price: '2,20 €',
     emoji: '🥜',
@@ -112,6 +150,7 @@ const bestSellers: Product[] = [
     id: 10,
     name: 'Lessive Dépannage',
     category: 'Entretien',
+    subCategory: 'Maison',
     description: 'Produit utile du quotidien pour dépannage rapide.',
     price: '5,90 €',
     emoji: '🧴',
@@ -121,6 +160,7 @@ const bestSellers: Product[] = [
     id: 11,
     name: 'Essuie-tout',
     category: 'Entretien',
+    subCategory: 'Maison',
     description: 'Indispensable maison, disponible en boutique.',
     price: '3,50 €',
     emoji: '🧻',
@@ -130,6 +170,7 @@ const bestSellers: Product[] = [
     id: 12,
     name: 'Briquet',
     category: 'Divers',
+    subCategory: 'Accessoires',
     description: 'Petit essentiel de dépannage.',
     price: '1,50 €',
     emoji: '🔥',
@@ -139,6 +180,7 @@ const bestSellers: Product[] = [
     id: 13,
     name: 'Chargeur Téléphone',
     category: 'Divers',
+    subCategory: 'Accessoires',
     description: 'Accessoire pratique selon disponibilité.',
     price: '9,90 €',
     emoji: '🔌',
@@ -149,6 +191,48 @@ const bestSellers: Product[] = [
 function App() {
   const [activeCategory, setActiveCategory] = useState<CategoryName>('Best seller')
   const [currentPage, setCurrentPage] = useState<'home' | 'cart' | 'account'>('home')
+  const [cartItems, setCartItems] = useState<CartItem[]>(getSavedCartItems)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+
+  useEffect(() => {
+    const animatedElements = document.querySelectorAll('.mapCard, .detailsCard, .lockerSection')
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('isVisible')
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.18 },
+    )
+
+    animatedElements.forEach((element) => observer.observe(element))
+
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems))
+  }, [cartItems])
+
+  const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0)
+
+  const addProductToCart = (product: Product) => {
+    setCartItems((currentItems) => {
+      const existingItem = currentItems.find((item) => item.id === product.id)
+
+      if (existingItem) {
+        return currentItems.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item,
+        )
+      }
+
+      return [...currentItems, { ...product, quantity: 1 }]
+    })
+  }
 
   const filteredProducts =
     activeCategory === 'Best seller'
@@ -157,8 +241,25 @@ function App() {
         ? bestSellers
         : bestSellers.filter((product) => product.category === activeCategory)
 
+  const productSections =
+    activeCategory === 'Best seller'
+      ? [['', filteredProducts] as const]
+      : Object.entries(
+          filteredProducts.reduce<Record<string, Product[]>>(
+            (groups, product) => {
+              if (!groups[product.subCategory]) {
+                groups[product.subCategory] = []
+              }
+
+              groups[product.subCategory].push(product)
+              return groups
+            },
+            {},
+          ),
+        )
+
   if (currentPage === 'cart') {
-    return <Panier onBack={() => setCurrentPage('home')} />
+    return <Panier cartItems={cartItems} setCartItems={setCartItems} onBack={() => setCurrentPage('home')} />
   }
 
   if (currentPage === 'account') {
@@ -180,30 +281,29 @@ function App() {
           </button>
 
           <button
-            className="headerButton cartButton"
+            className="cartIconButton"
             type="button"
             onClick={() => setCurrentPage('cart')}
+            aria-label="Ouvrir le panier"
           >
-            <span aria-hidden="true">🛒</span>
-            Panier
+            <span className="cartIcon" aria-hidden="true">🛒</span>
+            {cartItemCount > 0 ? <span className="cartBadge">{cartItemCount}</span> : null}
           </button>
         </div>
       </header>
 
       <section className="heroSection">
         <div className="heroText">
-          <p className="status">Ouvert aujourd’hui de 10h à 22h</p>
+          <div className="statusRow">
+            <p className="status">Ouvert 10h - 22h</p>
+            <p className="status">Livraison</p>
+            <p className="status">Click and collect</p>
+          </div>
           <h2>Tout ce qu’il te faut, rapidement.</h2>
           <p>
             Boissons, snacks, produits d’entretien, dépannage du quotidien et
             service locker colis au même endroit.
           </p>
-        </div>
-
-        <div className="heroCard">
-          <span>🚲</span>
-          <strong>Style livraison rapide</strong>
-          <p>Commande simple, retrait ou livraison locale.</p>
         </div>
       </section>
 
@@ -214,11 +314,26 @@ function App() {
       />
 
       <section className="bestSellerSection">
-        <div className="productGrid">
-          {filteredProducts.map((product) => (
-            <ProductCard product={product} key={product.id} />
-          ))}
-        </div>
+        {productSections.map(([sectionTitle, products]) => (
+          <div className="productCategoryGroup" key={sectionTitle || 'best-seller'}>
+            {sectionTitle ? (
+              <div className="productCategoryHeader">
+                <h2>{sectionTitle}</h2>
+              </div>
+            ) : null}
+
+            <div className="productGrid">
+              {products.map((product) => (
+                <ProductCard
+                  product={product}
+                  key={product.id}
+                  onAddToCart={() => addProductToCart(product)}
+                  onOpenProduct={() => setSelectedProduct(product)}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
       </section>
 
       <section className="infoSection">
@@ -255,6 +370,21 @@ function App() {
         </div>
         <button type="button">Voir le service</button>
       </section>
+
+      <footer className="legalBanner">
+        <p>
+          Politique de confidentialité · Mentions légales · Vente d’alcool interdite aux mineurs.
+          Une pièce d’identité peut être demandée lors du retrait ou de la livraison.
+        </p>
+      </footer>
+
+      {selectedProduct ? (
+        <VisionCard
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onAddToCart={() => addProductToCart(selectedProduct)}
+        />
+      ) : null}
     </main>
   )
 }

@@ -1,0 +1,250 @@
+
+
+.visionOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(18px);
+  animation: visionOverlayFade 0.22s ease both;
+}
+
+.visionCard {
+  position: relative;
+  width: min(920px, 100%);
+  max-height: min(720px, calc(100vh - 48px));
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  border-radius: 38px;
+  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.35);
+  animation: visionCardPop 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.visionCloseButton {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 2;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  background: #000000;
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.visionCloseButton:hover {
+  transform: scale(1.06);
+  background: #1b1b1b;
+}
+
+.visionImageBox {
+  min-height: 520px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 35% 24%, rgba(255, 255, 255, 0.95), transparent 34%),
+    linear-gradient(145deg, #f6f6f6, #e9e9e9);
+}
+
+.visionEmoji {
+  display: block;
+  font-size: clamp(120px, 16vw, 190px);
+  line-height: 1;
+  filter: drop-shadow(0 24px 35px rgba(0, 0, 0, 0.14));
+  animation: visionEmojiFloat 2.9s ease-in-out infinite;
+}
+
+.visionContent {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  padding: 58px 52px 46px;
+}
+
+.visionTopLine {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.visionTopLine span,
+.visionTopLine strong {
+  width: fit-content;
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: #000000;
+  background: #f1f1f1;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: -0.01em;
+}
+
+.visionTopLine strong {
+  color: #ffffff;
+  background: #000000;
+}
+
+.visionContent h2 {
+  margin: 0;
+  color: #000000;
+  font-size: clamp(34px, 4vw, 58px);
+  line-height: 0.92;
+  letter-spacing: -0.08em;
+}
+
+.visionContent p {
+  max-width: 430px;
+  margin: 0;
+  color: #5f5f5f;
+  font-size: 18px;
+  font-weight: 650;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
+}
+
+.visionFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.visionFooter > strong {
+  color: #000000;
+  font-size: 38px;
+  line-height: 1;
+  letter-spacing: -0.075em;
+  white-space: nowrap;
+}
+
+.visionAddButton {
+  min-height: 52px;
+  padding: 0 24px;
+  border: 0;
+  border-radius: 999px;
+  color: #ffffff;
+  background: #000000;
+  font-size: 14px;
+  font-weight: 950;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.visionAddButton:hover {
+  transform: translateY(-2px);
+  background: #1b1b1b;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.18);
+}
+
+@keyframes visionOverlayFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes visionCardPop {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.96);
+    filter: blur(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes visionEmojiFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg) scale(1);
+  }
+
+  50% {
+    transform: translateY(-8px) rotate(1deg) scale(1.03);
+  }
+}
+
+@media (max-width: 760px) {
+  .visionOverlay {
+    align-items: end;
+    padding: 14px;
+  }
+
+  .visionCard {
+    width: 100%;
+    max-height: calc(100vh - 28px);
+    grid-template-columns: 1fr;
+    border-radius: 30px;
+  }
+
+  .visionImageBox {
+    min-height: 260px;
+  }
+
+  .visionEmoji {
+    font-size: 118px;
+  }
+
+  .visionContent {
+    gap: 13px;
+    padding: 24px 22px 22px;
+  }
+
+  .visionContent h2 {
+    font-size: 34px;
+  }
+
+  .visionContent p {
+    font-size: 14px;
+    line-height: 1.42;
+  }
+
+  .visionFooter {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 13px;
+    margin-top: 8px;
+  }
+
+  .visionFooter > strong {
+    font-size: 30px;
+  }
+
+  .visionAddButton {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .visionCloseButton {
+    top: 14px;
+    right: 14px;
+    width: 38px;
+    height: 38px;
+    font-size: 27px;
+  }
+}

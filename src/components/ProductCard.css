@@ -1,102 +1,109 @@
-
-
 .productCard {
-  min-height: 250px;
+  aspect-ratio: 1.12 / 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 22px;
-  border-radius: 30px;
+  overflow: hidden;
+  border-radius: 28px;
   background: #ffffff;
-  border: none;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid #eeeeee;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.07);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .productCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  border-color: #dddddd;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.11);
+}
+
+.productImageBox {
+  width: 100%;
+  min-height: 48%;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.8), transparent 34%),
+    #f4f4f4;
 }
 
 .productEmoji {
-  width: 84px;
-  height: 84px;
-  display: grid;
-  place-items: center;
-  border-radius: 26px;
-  background: #f4f4f4;
-  font-size: 42px;
+  display: block;
+  font-size: 62px;
+  line-height: 1;
 }
 
-.productContent {
-  display: grid;
-  gap: 8px;
-}
-
-.productTopLine {
+.productInfo {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 11px 12px 0;
+  min-height: 42px;
+}
+
+.productMeta {
+  display: none;
 }
 
 .productCategory,
 .bestBadge {
-  width: fit-content;
   margin: 0;
-  padding: 7px 11px;
+  padding: 5px 8px;
   border-radius: 999px;
   color: #000000;
-  background: #f1f1f1;
-  font-size: 13px;
-  font-weight: 900;
-  letter-spacing: 0.02em;
+  background: #f2f2f2;
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.productCategory {
+  max-width: calc(100% - 56px);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .bestBadge {
+  margin-left: auto;
   color: #ffffff;
   background: #000000;
 }
 
 .productCard h3 {
-  margin: 8px 0 0;
-  color: #000000;
-  font-size: 24px;
-  line-height: 1.05;
-  letter-spacing: -0.05em;
-}
-
-.productDescription {
   margin: 0;
-  color: #666666;
-  line-height: 1.45;
-  font-weight: 500;
+  color: #000000;
+  font-size: 15px;
+  line-height: 1.05;
+  letter-spacing: -0.055em;
 }
 
-.productBottomLine {
+.productFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-top: auto;
+  gap: 8px;
+  padding: 4px 12px 7px;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
 
-.productBottomLine strong {
+.productFooter strong {
   color: #000000;
-  font-size: 22px;
-  letter-spacing: -0.04em;
+  font-size: 18px;
+  letter-spacing: -0.055em;
 }
 
 .addProductButton {
-  min-height: 42px;
-  padding: 0 16px;
+  min-height: 31px;
+  padding: 0 10px;
   border: 0;
   border-radius: 999px;
   color: #ffffff;
   background: #000000;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 950;
+  white-space: nowrap;
   transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -108,97 +115,132 @@
 
 @media (max-width: 900px) {
   .productCard {
-    min-height: 170px;
-    gap: 10px;
-    padding: 12px;
-    border-radius: 20px;
+    aspect-ratio: 1 / 1.42;
+    border-radius: 18px;
+  }
+
+  .productImageBox {
+    min-height: 44%;
   }
 
   .productEmoji {
-    width: 52px;
-    height: 52px;
-    border-radius: 17px;
-    font-size: 28px;
+    font-size: 42px;
   }
 
-  .productTopLine {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .productCategory,
-  .bestBadge {
-    padding: 5px 8px;
-    font-size: 10px;
-  }
-
-  .productCard h3 {
-    margin: 4px 0 0;
-    font-size: 15px;
-    line-height: 1.05;
-  }
-
-  .productDescription {
-    font-size: 12px;
-    line-height: 1.25;
-  }
-
-  .productBottomLine {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .productBottomLine strong {
-    font-size: 15px;
-  }
-
-  .addProductButton {
-    width: 100%;
+  .productInfo {
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 9px 0;
     min-height: 34px;
-    padding: 0 10px;
-    font-size: 11px;
-  }
-}
-
-@media (max-width: 560px) {
-  .productCard {
-    min-height: 150px;
-    gap: 8px;
-    padding: 9px;
-    border-radius: 17px;
   }
 
-  .productEmoji {
-    width: 44px;
-    height: 44px;
-    border-radius: 14px;
-    font-size: 24px;
+  .productMeta {
+    display: none;
   }
 
   .productCategory,
   .bestBadge {
     padding: 4px 6px;
-    font-size: 9px;
+    font-size: 8px;
+  }
+
+  .productCategory {
+    max-width: calc(100% - 42px);
   }
 
   .productCard h3 {
-    font-size: 13px;
+    font-size: 12px;
     line-height: 1;
   }
 
-  .productDescription {
-    font-size: 10px;
-    line-height: 1.2;
+  .productFooter {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 9px 6px;
+    margin-top: 2px;
+    flex-shrink: 0;
   }
 
-  .productBottomLine strong {
+  .productFooter strong {
     font-size: 13px;
   }
 
   .addProductButton {
-    min-height: 30px;
-    font-size: 10px;
+    width: 100%;
+    min-height: 28px;
+    padding: 0 7px;
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 560px) {
+  .productCard {
+    aspect-ratio: 1 / 1.52;
+    border-radius: 16px;
+  }
+
+  .productImageBox {
+    min-height: 42%;
+  }
+
+  .productEmoji {
+    font-size: 38px;
+  }
+
+  .productInfo {
+    justify-content: center;
+    gap: 4px;
+    padding: 7px 8px 0;
+    min-height: 32px;
+  }
+
+  .productCategory,
+  .bestBadge {
+    padding: 3px 5px;
+    font-size: 7px;
+  }
+
+  .productCard h3 {
+    font-size: 12px;
+  }
+
+  .productFooter {
+    padding: 3px 8px 6px;
+    margin-top: 1px;
+  }
+
+  .productFooter strong {
+    font-size: 12px;
+  }
+
+  .addProductButton {
+    min-height: 26px;
+    font-size: 8px;
+  }
+}
+
+.productCard.addedToCart {
+  animation: addedToCartPop 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes addedToCartPop {
+  0% {
+    transform: scale(1) translateY(0) rotate(0);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.07);
+  }
+
+  35% {
+    transform: scale(1.04) translateY(-6px) rotate(-0.6deg);
+    box-shadow: 0 28px 75px rgba(0, 0, 0, 0.18);
+  }
+
+  70% {
+    transform: scale(0.99) translateY(1px) rotate(0.4deg);
+  }
+
+  100% {
+    transform: scale(1) translateY(0) rotate(0);
+    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.07);
   }
 }

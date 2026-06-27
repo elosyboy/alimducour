@@ -1,6 +1,6 @@
 import './CategoryTabs.css'
 
-export type CategoryName = 'Best seller' | 'All' | 'Soft' | 'Alcool' | 'Sucré' | 'Salé' | 'Entretien' | 'Divers'
+export type CategoryName = 'Best seller' | 'All' | 'Soft' | 'Alcool' | 'Puff' | 'Sucré' | 'Salé' | 'Entretien' | 'Divers'
 
 type CategoryTabsProps = {
   categories: CategoryName[]
@@ -10,18 +10,26 @@ type CategoryTabsProps = {
 
 function CategoryTabs({ categories, activeCategory, onCategoryChange }: CategoryTabsProps) {
   return (
-    <section className="categoryTabs" aria-label="Catégories de produits">
-      {categories.map((category) => (
-        <button
-          className={`categoryTab ${activeCategory === category ? 'active' : ''}`}
-          type="button"
-          key={category}
-          onClick={() => onCategoryChange(category)}
-        >
-          {category}
-        </button>
-      ))}
-    </section>
+    <div className="categoryTabsWrapper">
+      <section className="categoryTabs" aria-label="Catégories de produits">
+        {categories.map((category) => (
+          <button
+            className={`categoryTab ${activeCategory === category ? 'active' : ''}`}
+            type="button"
+            key={category}
+            onClick={() => onCategoryChange(category)}
+          >
+            {category}
+          </button>
+        ))}
+      </section>
+
+      <div className="scrollHint" aria-hidden="true">
+        <span>›</span>
+        <span>›</span>
+        <span>›</span>
+      </div>
+    </div>
   )
 }
 

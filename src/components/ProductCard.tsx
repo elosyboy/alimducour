@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './ProductCard.css'
 
 export type ProductCardData = {
@@ -12,27 +13,48 @@ export type ProductCardData = {
 
 type ProductCardProps = {
   product: ProductCardData
+  onAddToCart: () => void
+  onOpenProduct?: () => void
 }
 
-function ProductCard({ product }: ProductCardProps) {
-  return (
-    <article className="productCard">
-      <div className="productEmoji">{product.emoji}</div>
+function ProductCard({ product, onAddToCart, onOpenProduct }: ProductCardProps) {
+  const [isAdded, setIsAdded] = useState(false)
 
-      <div className="productContent">
-        <div className="productTopLine">
-          <p className="productCategory">{product.category}</p>
+  const handleAddToCart = () => {
+    navigator.vibrate?.(35)
+    onAddToCart()
+    setIsAdded(true)
+
+    window.setTimeout(() => {
+      setIsAdded(false)
+    }, 420)
+  }
+  return (
+    <article className={`productCard ${isAdded ? 'addedToCart' : ''}`} onClick={onOpenProduct} role="button" tabIndex={0}>
+      <div className="productImageBox" aria-hidden="true">
+        <span className="productEmoji">{product.emoji}</span>
+      </div>
+
+      <div className="productInfo">
+        <div className="productMeta">
+          <span className="productCategory">{product.category}</span>
           {product.isBestSeller ? <span className="bestBadge">Best</span> : null}
         </div>
 
         <h3>{product.name}</h3>
-        <p className="productDescription">{product.description}</p>
       </div>
 
-      <div className="productBottomLine">
+      <div className="productFooter">
         <strong>{product.price}</strong>
-        <button className="addProductButton" type="button">
-          Ajouter
+        <button
+          className="addProductButton"
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation()
+            handleAddToCart()
+          }}
+        >
+          Ajouter au panier
         </button>
       </div>
     </article>
