@@ -239,7 +239,7 @@ function App() {
         {isProductsLoading ? (
           <div className="productsStateCard">
             <h2>Chargement des produits...</h2>
-            <p>Les produits de la boutique arrivent depuis Firebase.</p>
+            <p>Les produits de la boutique arrivent.</p>
           </div>
         ) : productsError ? (
           <div className="productsStateCard">
@@ -249,7 +249,7 @@ function App() {
         ) : filteredProducts.length === 0 ? (
           <div className="productsStateCard">
             <h2>Aucun produit disponible</h2>
-            <p>Ajoutez des produits dans Firebase pour les afficher sur le site.</p>
+            <p>Les produits de cette catégorie seront bientôt disponibles.</p>
           </div>
         ) : (
           productSections.map(([sectionTitle, products]) => (
