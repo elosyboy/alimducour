@@ -22,15 +22,15 @@ const cloudinaryCloudName = defineSecret('CLOUDINARY_CLOUD_NAME')
 const cloudinaryApiKey = defineSecret('CLOUDINARY_API_KEY')
 const cloudinaryApiSecret = defineSecret('CLOUDINARY_API_SECRET')
 
-const categories = ['Soft', 'Alcool', 'Puff', 'Sucré', 'Salé', 'Entretien', 'Divers']
+const categories = ['Boisson', 'Alcool', 'Puff', 'Sucré', 'Salé', 'Hygiène', 'Divers']
 
 const subCategoriesByCategory = {
-  Soft: ['Canettes', 'Bouteilles', 'Energy drink', 'Jus', 'Eau', 'Sirops'],
+  Boisson: ['Canettes', 'Bouteilles', 'Energy drink', 'Jus', 'Eau', 'Sirops'],
   Alcool: ['Bières', 'Vins', 'Spiritueux', 'Prêt à boire', 'Champagnes'],
   Puff: ['Puff', 'Recharge', 'E-liquides', 'Accessoires'],
   Sucré: ['Bonbons', 'Chocolats', 'Gâteaux', 'Glaces', 'Biscuits'],
   Salé: ['Chips', 'Gâteaux apéro', 'Nouilles', 'Conserves', 'Sandwichs'],
-  Entretien: ['Hygiène', 'Maison', 'Animaux', 'Nettoyage', 'Lessive'],
+  Hygiène: ['Hygiène', 'Maison', 'Animaux', 'Nettoyage', 'Lessive'],
   Divers: ['Autres', 'Accessoires', 'Dépannage'],
 }
 const orderStatuses = ['pending', 'accepted', 'preparing', 'ready', 'delivered', 'cancelled']
@@ -42,6 +42,18 @@ const statusLabels = {
   ready: 'Prête',
   delivered: 'Terminée',
   cancelled: 'Annulée',
+}
+
+function normalizeCategory(category) {
+  if (category === 'Soft') {
+    return 'Boisson'
+  }
+
+  if (category === 'Entretien') {
+    return 'Hygiène'
+  }
+
+  return category
 }
 
 function getAdminIds() {
@@ -461,7 +473,7 @@ async function handleCallbackQuery(callbackQuery) {
 
     if (!session || session.action !== 'add_product') return
 
-    session.data.category = data.replace('add_category:', '')
+    session.data.category = normalizeCategory(data.replace('add_category:', ''))
     session.step = 'subcategory_choice'
     await setSession(chatId, session)
 

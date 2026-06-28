@@ -1,6 +1,6 @@
 import './CategoryTabs.css'
 
-export type CategoryName = 'Best seller' | 'All' | 'Soft' | 'Alcool' | 'Puff' | 'Sucré' | 'Salé' | 'Entretien' | 'Divers'
+export type CategoryName = 'Best seller' | 'All' | 'Boisson' | 'Alcool' | 'Puff' | 'Sucré' | 'Salé' | 'Hygiène' | 'Divers'
 
 type CategoryTabsProps = {
   categories: CategoryName[]

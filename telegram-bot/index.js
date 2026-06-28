@@ -41,7 +41,7 @@ cloudinary.config({
 const bot = new TelegramBot(botToken, { polling: true })
 const userSessions = new Map()
 
-const categories = ['Soft', 'Alcool', 'Puff', 'Sucré', 'Salé', 'Entretien', 'Divers']
+const categories = ['Boisson', 'Alcool', 'Puff', 'Sucré', 'Salé', 'Hygiène', 'Divers']
 const orderStatuses = ['pending', 'accepted', 'preparing', 'ready', 'delivered', 'cancelled']
 
 const statusLabels = {
@@ -51,6 +51,18 @@ const statusLabels = {
   ready: 'Prête',
   delivered: 'Terminée',
   cancelled: 'Annulée',
+}
+
+function normalizeCategory(category) {
+  if (category === 'Soft') {
+    return 'Boisson'
+  }
+
+  if (category === 'Entretien') {
+    return 'Hygiène'
+  }
+
+  return category
 }
 
 function isAdminChat(chatId) {
@@ -377,11 +389,11 @@ bot.on('callback_query', async (callbackQuery) => {
 
     if (!session || session.action !== 'add_product') return
 
-    session.data.category = data.replace('add_category:', '')
+    session.data.category = normalizeCategory(data.replace('add_category:', ''))
     session.step = 'subcategory'
     setSession(chatId, session)
 
-    await bot.sendMessage(chatId, 'Sous-catégorie ?\nExemple : Canettes, Bouteilles, Bonbons, Chips, Hygiène')
+    await bot.sendMessage(chatId, 'Sous-catégorie ?\nExemple : Canettes, Bouteilles, Bonbons, Chips, Maison')
     return
   }
 
@@ -506,7 +518,7 @@ bot.on('message', async (message) => {
     session.data.subCategory = text
     session.step = 'description'
     setSession(chatId, session)
-    await bot.sendMessage(chatId, 'Description courte ?\nExemple : Boisson fraîche disponible en boutique.')
+    await bot.sendMessage(chatId, 'Description courte ?\nExemple : Produit disponible en boutique.')
     return
   }
 

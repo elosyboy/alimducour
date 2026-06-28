@@ -27,6 +27,18 @@ type CartItem = Product & {
 
 const CART_STORAGE_KEY = 'alimducour-cart'
 
+function normalizeCategory(category: string) {
+  if (category === 'Soft') {
+    return 'Boisson'
+  }
+
+  if (category === 'Entretien') {
+    return 'Hygiène'
+  }
+
+  return category
+}
+
 function getSavedCartItems() {
   try {
     const savedCart = window.localStorage.getItem(CART_STORAGE_KEY)
@@ -50,12 +62,12 @@ function getSavedCartItems() {
 const categories: CategoryName[] = [
   'Best seller',
   'All',
-  'Soft',
+  'Boisson',
   'Alcool',
   'Puff',
   'Sucré',
   'Salé',
-  'Entretien',
+  'Hygiène',
   'Divers',
 ]
 
@@ -79,7 +91,7 @@ function App() {
             const product: Product = {
               id: doc.id,
               name: String(data.name ?? ''),
-              category: String(data.category ?? 'Divers'),
+              category: normalizeCategory(String(data.category ?? 'Divers')),
               subCategory: String(data.subCategory ?? 'Autres'),
               description: String(data.description ?? ''),
               price: String(data.price ?? '0 €'),
@@ -104,8 +116,7 @@ function App() {
         setProductsError('')
         setIsProductsLoading(false)
       },
-      (error) => {
-        console.error(error)
+      () => {
         setProducts([])
         setProductsError('Impossible de charger les produits pour le moment.')
         setIsProductsLoading(false)
@@ -183,7 +194,6 @@ function App() {
     return <Panier cartItems={cartItems} setCartItems={setCartItems} onBack={() => setCurrentPage('home')} />
   }
 
-
   return (
     <main className="app">
       <header className="header">
@@ -212,7 +222,7 @@ function App() {
           </div>
           <h2>Tout ce qu’il te faut, rapidement.</h2>
           <p>
-            Boissons, snacks, produits d’entretien, dépannage du quotidien et
+            Boissons, snacks, produits d’hygiène, dépannage du quotidien et
             service locker colis au même endroit.
           </p>
         </div>
@@ -268,7 +278,7 @@ function App() {
         <div className="mapCard">
           <iframe
             className="realMap"
-            title="Carte Alimducour - 6 rue de la Mule Noire, 13100 Aix-en-Provence"
+            title="Carte Alim du Cours - 6 rue de la Mule Noire, 13100 Aix-en-Provence"
             src="https://www.google.com/maps?q=6%20rue%20de%20la%20Mule%20Noire%2C%2013100%20Aix-en-Provence&output=embed"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
