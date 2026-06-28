@@ -51,10 +51,11 @@ button {
 }
 
 .logoImage {
-  width: 64px;
+  width: 98px;
   height: auto;
   display: block;
   object-fit: contain;
+  transform: translateY(-8px);
 }
 
 .headerActions {
@@ -458,7 +459,8 @@ button {
     align-items: center;
   }
   .logoImage {
-    width: 56px;
+    width: 82px;
+    transform: translateY(-6px);
   }
 
   .headerActions {
